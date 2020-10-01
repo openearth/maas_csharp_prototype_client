@@ -62,7 +62,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Api\DeltaSphereCaasApi.cs" />
+    <Compile Include="Entities\FlexibleMeshInputs.cs" />
     <Compile Include="Entities\Job.cs" />
+    <Compile Include="Entities\JobStatus.cs" />
     <Compile Include="Entities\User.cs" />
     <Compile Include="Helpers\CookieAwareWebClient.cs">
       <SubType>Component</SubType>
@@ -71,6 +73,11 @@
     <Compile Include="Helpers\FileHelper.cs" />
     <Compile Include="Helpers\FileUploadObject.cs" />
     <Compile Include="Helpers\UploadFile.cs" />
+    <Compile Include="Views\Activity.cs" />
+    <Compile Include="Api\CreateFmJobData.cs" />
+    <Compile Include="Views\IRemotePath.cs" />
+    <Compile Include="Views\RemoteFolder.cs" />
+    <Compile Include="Views\RemotePath.cs" />
     <Compile Include="Views\Shared\InverseBooleanConverter.cs" />
     <Compile Include="Views\MainWindowViewModel.cs" />
     <Compile Include="Entities\Process.cs" />

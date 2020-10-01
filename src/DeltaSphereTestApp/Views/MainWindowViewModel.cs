@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Threading;
 using DeltaSphereTestApp.Api;
 using DeltaSphereTestApp.Entities;
 using DeltaSphereTestApp.Helpers;
@@ -16,10 +17,9 @@ namespace DeltaSphereTestApp.Views
 {
     internal sealed class MainWindowViewModel : INotifyPropertyChanged
     {
-        private const string Server = "http://127.0.0.1:8000/";
+        private const string Server = "http://127.0.0.1:8000/v1/";
         private bool loginSuccessful;
         private string errorMessage;
-        private string data;
         private string sessionId;
 
         private IEnumerable<Process> processes;
@@ -28,9 +28,12 @@ namespace DeltaSphereTestApp.Views
         private Process selectedProcess;
         private string inputDirectory;
         private IEnumerable<string> files;
-        private string newJobName;
+        private string newJobTitle;
         private DeltaSphereCaasApi api;
         private Job selectedJob;
+        private string newJobDescription;
+        private bool showNewJobScreen;
+        private RemoteFolder filesRootFolder;
 
         public MainWindowViewModel()
         {
@@ -51,7 +54,12 @@ namespace DeltaSphereTestApp.Views
         /// Command to get (input) files on s3
         /// </summary>
         public ICommand GetFilesOverviewCommand { get; private set; }
-        
+
+        /// <summary>
+        /// Delete files from s3
+        /// </summary>
+        public ICommand DeleteFileCommand { get; private set; }
+
         /// <summary>
         /// Get inputDirectory from folder
         /// </summary>
@@ -71,6 +79,11 @@ namespace DeltaSphereTestApp.Views
         /// Deletes the currently selected job
         /// </summary>
         public ICommand DeleteJobCommand { get; set; }
+
+        /// <summary>
+        /// Refreshes the jobs for the current process
+        /// </summary>
+        public ICommand RefreshJobsCommand { get; set; }
 
         /// <summary>
         /// Indicator for login successful or not
@@ -119,7 +132,12 @@ namespace DeltaSphereTestApp.Views
                 OnPropertyChanged();
             }
         }
-        
+
+        public IEnumerable<RemoteFolder> FilesRootFolder
+        {
+            get { return new[] {filesRootFolder}; }
+        }
+
         /// <summary>
         /// List of files that are on the s3 bucket
         /// </summary>
@@ -129,19 +147,6 @@ namespace DeltaSphereTestApp.Views
             set
             {
                 files = value;
-                OnPropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// Received data
-        /// </summary>
-        public string Data
-        {
-            get { return data; }
-            set
-            {
-                data = value;
                 OnPropertyChanged();
             }
         }
@@ -207,7 +212,10 @@ namespace DeltaSphereTestApp.Views
             get { return jobs; }
             set
             {
-                var observableCollection = new ObservableCollection<Job>(value);
+                var observableCollection = value != null
+                    ? new ObservableCollection<Job>(value)
+                    : new ObservableCollection<Job>();
+
                 observableCollection.CollectionChanged += (s, a) =>
                 {
                     if (a.Action != NotifyCollectionChangedAction.Remove) return;
@@ -224,6 +232,8 @@ namespace DeltaSphereTestApp.Views
             }
         }
 
+        public ObservableCollection<Activity> ActivityList { get; } = new ObservableCollection<Activity>();
+
         /// <summary>
         /// Selected input files to upload
         /// </summary>
@@ -237,12 +247,32 @@ namespace DeltaSphereTestApp.Views
             }
         }
 
-        public string NewJobName
+        public bool ShowNewJobScreen
         {
-            get { return newJobName; }
+            get { return showNewJobScreen; }
             set
             {
-                newJobName = value;
+                showNewJobScreen = value; 
+                OnPropertyChanged();
+            }
+        }
+
+        public string NewJobTitle
+        {
+            get { return newJobTitle; }
+            set
+            {
+                newJobTitle = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string NewJobDescription
+        {
+            get { return newJobDescription; }
+            set
+            {
+                newJobDescription = value;
                 OnPropertyChanged();
             }
         }
@@ -301,27 +331,105 @@ namespace DeltaSphereTestApp.Views
         {
             GetProcessesCommand = new RelayCommand(o => { UpdateProcesses(); });
 
-            GetFilesOverviewCommand = new RelayCommand(async o =>
-            {
-                Files = await api.GetFiles();
-            });
+            GetFilesOverviewCommand = new RelayCommand(o => UpdateFiles());
             
-            GetInputFilesFromFolderCommand = new RelayCommand(o =>
-            {
-                InputDirectory = GetFolderName();
-            });
+            GetInputFilesFromFolderCommand = new RelayCommand(o => InputDirectory = GetFolderName());
 
-            AddJobCommand = new RelayCommand(async o =>
-            {
-                var tarFilePath = await Task.Run(() => FileHelper.CreateTarGz("InputData", InputDirectory));
-                await api.UploadFiles(new []{tarFilePath}, SelectedProcess.Id, NewJobName);
-            });
+            RefreshJobsCommand = new RelayCommand(o => UpdateJobs());
+
+            AddJobCommand = new RelayCommand(o => AddJob());
 
             DeleteJobCommand = new RelayCommand(
                 async o => await api.DeleteJob(SelectedProcess.Id, SelectedJob.JobId), 
                 o => SelectedJob != null);
 
             GetMeCommand = new RelayCommand(o => { UpdateLoginName(); });
+
+            DeleteFileCommand = new RelayCommand<object>(async o =>
+            {
+                if (!(o is IRemotePath remotePath)) return;
+
+                var remotePaths = o is RemoteFolder folder 
+                    ? folder.GetAllSubPathsRecursive().ToArray() 
+                    : new [] {remotePath};
+
+                foreach (var path in remotePaths)
+                {
+                    var success = await api.DeleteFile(path.FullPath);
+                    if (!success)
+                    {
+                        ErrorMessage = $"Could not delete {o}";
+                    }
+                }
+
+                UpdateFiles();
+            }, o => o is IRemotePath);
+        }
+
+        private async void AddJob()
+        {
+            ShowNewJobScreen = false;
+            var jobData = new CreateFmJobData {Title = newJobTitle, Description = newJobDescription, ProcessId = SelectedProcess.Id};
+
+            var addJobActivity = new Activity {Name = $"Adding job {newJobTitle}", ProgressText = "Creating tar file"};
+
+            ActivityList.Add(addJobActivity);
+
+            IProgress<string> progress = new Progress<string>(s => { Dispatcher.CurrentDispatcher.Invoke(() => { addJobActivity.ProgressText = s; }); });
+
+            var tarFilePath = await Task.Run(() => FileHelper.CreateTarGz("InputData", InputDirectory, progress));
+            var uploadedFiles = await api.UploadFiles(new[] {tarFilePath}, SelectedProcess.Id, NewJobTitle, progress);
+
+            progress.Report($"Creating job \"{NewJobTitle}\"");
+            jobData.RelativeS3Path = uploadedFiles[0].RemotePath.Split(new[] {'/'}, 3)[2];
+            await api.CreateJob(jobData);
+            progress.Report($"Job \"{NewJobTitle}\" is created");
+
+            ActivityList.Remove(addJobActivity);
+            //UpdateJobs();
+        }
+
+        private async void UpdateFiles()
+        {
+            filesRootFolder = new RemoteFolder {Name = "root"};
+
+            var filePaths = await api.GetFiles();
+
+            AddPathsToFolder(filePaths, filesRootFolder);
+            OnPropertyChanged(nameof(FilesRootFolder));
+        }
+
+        private void AddPathsToFolder(IEnumerable<string> paths, RemoteFolder rootFolder)
+        {
+            var spitPaths = paths.Where(p => !string.IsNullOrEmpty(p))
+                .Select(p => p.Split(new[] {'/'}, 2));
+
+            var pathLookup = spitPaths.GroupBy(p => p[0], p => p.Length > 1 ? p[1]: null);
+
+            foreach (var path in pathLookup)
+            {
+                var key = path.Key;
+                var shortedPaths = path.ToArray();
+
+                if (shortedPaths.Length == 1 && string.IsNullOrEmpty(shortedPaths[0]))
+                {
+                    rootFolder.Files.Add(new RemotePath
+                    {
+                        Name = key,
+                        ParentFolder = rootFolder
+                    });
+                    continue;
+                }
+
+                var subfolder = rootFolder.SubFolders.FirstOrDefault(f => f.Name == key);
+                if (subfolder == null)
+                {
+                    subfolder = new RemoteFolder { Name = key, ParentFolder = rootFolder };
+                    rootFolder.SubFolders.Add(subfolder);
+                }
+
+                AddPathsToFolder(shortedPaths, subfolder);
+            }
         }
     }
 }

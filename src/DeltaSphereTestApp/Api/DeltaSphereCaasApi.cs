@@ -13,29 +13,30 @@ namespace DeltaSphereTestApp.Api
     public class DeltaSphereCaasApi
     {
         private const string ProcessesUriId = "processes";
-        private const string JobsUriId = "jobs";    
-        
+        private const string JobsUriId = "jobs";
+        private const string FilesUriId = "files";
+
         private readonly string sessionId;
-        internal readonly Uri BaseUri;
+        private readonly Uri baseUri;
 
         private string errorMessage;
 
         public DeltaSphereCaasApi(string serverAddress, string sessionId)
         {
             this.sessionId = sessionId;
-            BaseUri = new Uri(serverAddress);
+            baseUri = new Uri(serverAddress);
         }
 
         internal async Task<string> GetLoginName()
         {
-            var loginNames = await GetStringFromAsync(new Uri(BaseUri, "me"));
+            var loginNames = await GetStringFromAsync(new Uri(baseUri, "me"));
             var userData = JsonConvert.DeserializeObject<User>(loginNames);
             return userData.Email;
         }
 
         internal async Task<IList<Process>> GetProcesses()
         {
-            var modelJson = await GetStringFromAsync(new Uri(BaseUri, ProcessesUriId));
+            var modelJson = await GetStringFromAsync(new Uri(baseUri, ProcessesUriId));
             return JsonConvert.DeserializeObject<List<Process>>(modelJson);
         }
 
@@ -46,13 +47,19 @@ namespace DeltaSphereTestApp.Api
                 errorMessage = "Could not retrieve jobs because no process has been selected";
                 return null;
             }
-            var jobsJson = await GetStringFromAsync(new Uri(BaseUri, $"{ProcessesUriId}/{process.Id}/{JobsUriId}"));
+            var jobsJson = await GetStringFromAsync(new Uri(baseUri, $"{ProcessesUriId}/{process.Id}/{JobsUriId}"));
             return JsonConvert.DeserializeObject<List<Job>>(jobsJson);
+        }
+
+        internal async Task CreateJob(CreateFmJobData fmJobData)
+        {
+            var uri = new Uri(baseUri, $"{ProcessesUriId}/{fmJobData.ProcessId}/{JobsUriId}");
+            await PostDataTo(uri, JsonConvert.SerializeObject(fmJobData.CreateFlexibleMeshInputs()));
         }
 
         internal async Task DeleteJob(string processId, string jobId)
         {
-            var url = new Uri(BaseUri, $"{ProcessesUriId}/{processId}/{JobsUriId}/{jobId}");
+            var url = new Uri(baseUri, $"{ProcessesUriId}/{processId}/{JobsUriId}/{jobId}");
             await DoWithClientAsync(url, async client =>
             {
                 await Task.Run(() => client.UploadValues(url, "DELETE", new NameValueCollection()));
@@ -61,15 +68,17 @@ namespace DeltaSphereTestApp.Api
 
         internal async Task<IList<string>> GetFiles()
         {
-            var filesJson = await GetStringFromAsync(new Uri(BaseUri, "files"));
+            var filesJson = await GetStringFromAsync(new Uri(baseUri, FilesUriId));
             return JsonConvert.DeserializeObject<List<string>>(filesJson);
         }
 
-        internal async Task UploadFiles(IEnumerable<string> filePaths, string processId, string jobName)
+        internal async Task<IList<FileUploadObject>> UploadFiles(IList<string> filePaths, string processId, string jobName, IProgress<string> progress = null)
         {
+            var remotePaths = new List<FileUploadObject>();
+
             foreach (var filePath in filePaths)
             {
-                var fileUploadUri = new Uri(BaseUri, $"files/{processId}/{jobName}/{Path.GetFileName(filePath)}");
+                var fileUploadUri = new Uri(baseUri, $"files/{processId}/{jobName}/{Path.GetFileName(filePath)}");
 
                 FileUploadObject generatedRemotePath = null;
                 await DoWithClientAsync(fileUploadUri, async client =>
@@ -78,28 +87,51 @@ namespace DeltaSphereTestApp.Api
                     generatedRemotePath = JsonConvert.DeserializeObject<FileUploadObject>(cloudPath);
                 });
 
-                using (var stream = File.Open(filePath, FileMode.Open))
+                remotePaths.Add(generatedRemotePath);
+                progress?.Report($"Uploading {Path.GetFileName(filePath)} to {generatedRemotePath.RemotePath}");
+
+                await Task.Run(() =>
                 {
-                    var files = new[]
+                    using (var stream = File.Open(filePath, FileMode.Open))
                     {
-                        new UploadFile
+                        var files = new[]
                         {
-                            Name = "file",
-                            Filename = Path.GetFileName(filePath),
-                            ContentType = "text/plain",
-                            Stream = stream
+                            new UploadFile
+                            {
+                                Name = "file",
+                                Filename = Path.GetFileName(filePath),
+                                ContentType = "text/plain",
+                                Stream = stream
+                            }
+                        };
+
+                        var values = new NameValueCollection();
+                        foreach (var field in generatedRemotePath.Fields)
+                        {
+                            values.Add(field.Key, field.Value);
                         }
-                    };
 
-                    var values = new NameValueCollection();
-                    foreach (var field in generatedRemotePath.Fields)
-                    {
-                        values.Add(field.Key, field.Value);
+                        FileHelper.UploadFiles(generatedRemotePath.Url, files, values);
                     }
-
-                    FileHelper.UploadFiles(generatedRemotePath.Url, files, values);
-                }
+                });
             }
+
+            return remotePaths;
+        }
+
+        internal async Task<bool> DeleteFile(string s3FilePath)
+        {
+            var escapedS3Path = s3FilePath.Replace(Path.DirectorySeparatorChar.ToString(), "%2F");
+
+            var url = new Uri(baseUri, $"{FilesUriId}/{escapedS3Path}");
+            var deleteSuccessful = false;
+            await DoWithClientAsync(url, async client =>
+            {
+                await Task.Run(() => client.UploadValues(url, "DELETE", new NameValueCollection()));
+                deleteSuccessful = true;
+            });
+
+            return deleteSuccessful;
         }
 
         private async Task PostDataTo(Uri uri, byte[] byteData)

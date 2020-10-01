@@ -13,10 +13,13 @@ namespace DeltaSphereTestApp.Helpers
 {
     public static class FileHelper
     {
-        public static string CreateTarGz(string tgzFilename, string directory)
+        public static string CreateTarGz(string tgzFilename, string directory, IProgress<string> progress = null)
         {
-            var tempPath = Path.GetTempPath();
+            var guid = Guid.NewGuid();
+            var tempPath = Path.Combine(Path.GetTempPath(), guid.ToString());
             var tarPath = Path.Combine(tempPath, $"{tgzFilename}.tar");
+
+            Directory.CreateDirectory(tempPath);
 
             using (var outStream = File.Create(tarPath))
             using (var gzoStream = new GZipOutputStream(outStream))
@@ -27,12 +30,17 @@ namespace DeltaSphereTestApp.Helpers
                 var tarEntry = TarEntry.CreateEntryFromFile(directory);
                 tarEntry.Name = Path.GetFileName(directory);
 
+                tarArchive.ProgressMessageEvent += (archive, entry, message) =>
+                {
+                    progress?.Report(message);
+                };
+
                 tarArchive.WriteEntry(tarEntry, true);
             }
 
             return tarPath;
         }
-
+        
         /// <summary>
         /// Uploads the provided files to the selected address
         /// </summary>

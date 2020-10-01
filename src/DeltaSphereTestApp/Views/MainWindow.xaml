@@ -20,6 +20,23 @@
                     <ResourceDictionary Source="MainWindowResources.xaml"/>
                     <ResourceDictionary>
                         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+                        <DrawingGroup x:Key="FolderDrawing">
+                            <DrawingGroup.Children>
+                                <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M0,0L16,0 16,16 0,16z" />
+                                <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M15,4.5L15,12.5C15,13.327,14.323,14,13.496,14L12.499,14C12.008,15.173,10.849,16,9.5,16L3.875,16C2.097,16 0.609999999999999,14.789 0.156000000000001,13.153 0.0589999999999993,12.955 0,12.735 0,12.5L0,2.5C0,1.673,0.673,1,1.5,1L9.61,1 10.61,3 13.496,3C14.323,3,15,3.673,15,4.5" />
+                                <GeometryDrawing Brush="#FFDBB679" Geometry="F1M2,4L2,3 8.374,3 8.874,4z M13.496,4L10,4 9.992,4 8.992,2 1.5,2C1.225,2,1,2.224,1,2.5L1,9.545C1.676,8.792 2.633,8.299 3.71,8.253 4.493,7.461 5.572,7 6.687,7 8.432,7 9.985,8.1 10.599,9.691 11.861,10.148 12.75,11.363 12.75,12.75 12.75,12.836 12.731,12.916 12.725,13L13.496,13C13.773,13,14,12.776,14,12.5L14,4.5C14,4.224,13.773,4,13.496,4" />
+                                <GeometryDrawing Brush="#FF424242" Geometry="F1M6.6875,8C5.6835,8 4.7485,8.484 4.1545,9.264 4.0625,9.255 3.9685,9.25 3.8745,9.25 2.2895,9.25 1.0005,10.54 1.0005,12.125 1.0005,13.71 2.2895,15 3.8745,15L9.5005,15C10.7405,15 11.7495,13.991 11.7495,12.75 11.7495,11.613 10.9015,10.67 9.8045,10.521 9.4975,9.082 8.2165,8 6.6875,8 M6.6875,9C7.8955,9,8.8755,9.979,8.8755,11.188L8.8755,11.5 9.5005,11.5C10.1905,11.5 10.7495,12.06 10.7495,12.75 10.7495,13.44 10.1905,14 9.5005,14L3.8745,14C2.8395,14 2.0005,13.161 2.0005,12.125 2.0005,11.089 2.8395,10.25 3.8745,10.25 4.1505,10.25 4.4105,10.313 4.6455,10.42 4.9575,9.592 5.7505,9 6.6875,9" />
+                                <GeometryDrawing Brush="#FFEFEFF0" Geometry="F1M6.6875,9C7.8955,9,8.8755,9.979,8.8755,11.188L8.8755,11.5 9.5005,11.5C10.1905,11.5 10.7495,12.06 10.7495,12.75 10.7495,13.44 10.1905,14 9.5005,14L3.8745,14C2.8395,14 2.0005,13.161 2.0005,12.125 2.0005,11.089 2.8395,10.25 3.8745,10.25 4.1505,10.25 4.4105,10.313 4.6455,10.42 4.9575,9.592 5.7505,9 6.6875,9 M2.0005,3L8.3745,3 8.8745,4 2.0005,4z" />
+                            </DrawingGroup.Children>
+                        </DrawingGroup>
+                        <DrawingGroup x:Key="FileDrawing">
+                            <DrawingGroup.Children>
+                                <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
+                                <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M16,3.5557L16,11.9997C16,12.9697,15.299,13.9997,14,13.9997L11.746,13.9997C11.328,15.0407 10.396,15.8167 9.254,15.9577 9.193,15.9717 9.067,15.9847 8.938,15.9847L3.243,15.9847C1.416,15.9517 0,14.4667 0,12.6067 0,11.3817 0.644,10.2657 1.648,9.6727 2.003,8.4837 2.887,7.5727 4,7.2007L4,1.9997C4,0.7017,5.03,-0.000300000000000189,6,-0.000300000000000189L12.061,-0.000300000000000189z" />
+                                <GeometryDrawing Brush="#FF424242" Geometry="F1M15,4L15,12C15,12,14.965,13,13.965,13L11.967,13C11.972,12.926 11.986,12.855 11.986,12.78 11.986,12.513 11.952,12.252 11.892,12L14,12 14,5 11,5 11,2 6,2 6,7.139C5.715,7.065 5.423,7.015 5.124,7.015 5.082,7.015 5.042,7.023 5,7.025L5,2C5,1,5.964,1,5.964,1L11.641,1z M8.938,13.995L8.938,14 3.243,14 3.243,13.999C2.556,13.987 2,13.372 2,12.606 2,11.839 2.564,11.216 3.261,11.216 3.357,11.216 3.45,11.23 3.54,11.253 3.506,11.107 3.482,10.959 3.482,10.802 3.482,9.799 4.218,8.988 5.124,8.988 5.943,8.988 6.617,9.653 6.742,10.52 6.896,10.075 7.282,9.759 7.739,9.759 8.33,9.759 8.809,10.286 8.809,10.939 8.809,11.186 8.741,11.412 8.627,11.602 8.709,11.579 8.795,11.565 8.885,11.565 9.493,11.565 9.986,12.11 9.986,12.781 9.986,13.435 9.521,13.962 8.938,13.995 M9.804,10.8C9.731,9.674 8.833,8.78 7.739,8.78 7.503,8.78 7.273,8.823 7.058,8.903 6.575,8.352 5.886,8.015 5.124,8.015 3.811,8.015 2.72,9.033 2.517,10.363 1.635,10.687 1,11.57 1,12.606 1,13.917 1.977,14.961 3.243,14.984L8.938,14.984C9.004,14.984 9.068,14.977 9.131,14.966 10.182,14.836 10.986,13.901 10.986,12.78 10.986,11.911 10.503,11.159 9.804,10.8" />
+                                <GeometryDrawing Brush="#FFF0EFF1" Geometry="F1M11,5L11,2 6,2 6,7.139C6.49,7.266 6.954,7.484 7.352,7.806 7.48,7.789 7.609,7.78 7.739,7.78 9.172,7.78 10.395,8.808 10.723,10.2 11.309,10.644 11.717,11.279 11.892,12L14,12 14,5z M9.986,12.781C9.986,13.435,9.521,13.962,8.937,13.995L8.937,14 3.243,14 3.243,13.999C2.556,13.987 2,13.372 2,12.606 2,11.839 2.564,11.216 3.261,11.216 3.357,11.216 3.45,11.23 3.54,11.253 3.506,11.107 3.482,10.959 3.482,10.802 3.482,9.799 4.218,8.988 5.124,8.988 5.943,8.988 6.617,9.653 6.742,10.52 6.896,10.075 7.282,9.759 7.739,9.759 8.33,9.759 8.809,10.286 8.809,10.939 8.809,11.186 8.741,11.412 8.627,11.602 8.709,11.579 8.795,11.565 8.885,11.565 9.493,11.565 9.986,12.11 9.986,12.781" />
+                            </DrawingGroup.Children>
+                        </DrawingGroup>
                     </ResourceDictionary>
                 </ResourceDictionary.MergedDictionaries>
             </ResourceDictionary>
@@ -55,19 +72,36 @@
                           MinWidth="200"
                           Margin="5"/>
                 <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
                     <ToggleButton x:Name="AddButton" 
+                                  Grid.Column="0"
                                   IsEnabled="{Binding HasSelectedProcess}" 
+                                  IsChecked="{Binding ShowNewJobScreen}"
                                   Margin="5"
-                                  Width="100">
+                                  Width="100"
+                                  Height="25">
                         <ToggleButton.Content>
                             <TextBlock Text="Add job"/>
                         </ToggleButton.Content>
                     </ToggleButton>
+
+                    <Button Content="Refresh" 
+                            Grid.Column="1"
+                            Margin="5"
+                            Width="100"
+                            Height="25"
+                            IsEnabled="{Binding HasSelectedProcess}"
+                            Command="{Binding RefreshJobsCommand}"/>
+
                     <Popup PlacementTarget="{Binding ElementName=AddButton}"
-                           IsOpen="{Binding Path=IsChecked, ElementName=AddButton}">
+                           IsOpen="{Binding ShowNewJobScreen}">
                         <Border BorderBrush="Black" Background="White" BorderThickness="1">
                             <Grid Width="600">
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition />
@@ -90,18 +124,21 @@
                                 </Grid.ColumnDefinitions>
 
                                 <TextBlock Grid.Row="0" Grid.Column ="0" Text="Job name"/>
-                                <TextBox Grid.Row="0" Grid.Column ="1" Text="{Binding NewJobName}" Margin="5" Height="28"/>
+                                <TextBox Grid.Row="0" Grid.Column ="1" Text="{Binding NewJobTitle}" Margin="5" Height="28"/>
 
-                                <TextBlock Grid.Row="1" Grid.Column ="0" Text="Input folder"/>
-                                <Border Grid.Row="1" Grid.Column ="1" BorderBrush="Black" BorderThickness="1" Margin="5">
+                                <TextBlock Grid.Row="1" Grid.Column ="0" Text="Job description"/>
+                                <TextBox Grid.Row="1" Grid.Column ="1" Text="{Binding NewJobDescription}" Margin="5" Height="28"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column ="0" Text="Input folder"/>
+                                <Border Grid.Row="2" Grid.Column ="1" BorderBrush="Gray" BorderThickness="1" Margin="5">
                                     <TextBlock Text="{Binding InputDirectory}"/>
                                 </Border>
 
-                                <StackPanel Grid.Row="1" Grid.Column="2" >
+                                <StackPanel Grid.Row="2" Grid.Column="2" >
                                     <Button Content="Select folder" Command="{Binding GetInputFilesFromFolderCommand}"/>
                                 </StackPanel>
 
-                                <Button Grid.Row="2" Grid.Column="2" Content="Add job" Command="{Binding AddJobCommand}"/>
+                                <Button Grid.Row="3" Grid.Column="2" Content="Add job" Command="{Binding AddJobCommand}"/>
                             </Grid>
                         </Border>
                     </Popup>
@@ -113,23 +150,107 @@
                       ItemsSource="{Binding Jobs}"
                       CanUserAddRows="False"
                       AutoGenerateColumns="False"
+                      HeadersVisibility="Column"
                       SelectionChanged="SelectorOnSelectionChanged"
                       CanUserDeleteRows="True">
+                <DataGrid.RowDetailsTemplate>
+                    <DataTemplate DataType="entities:Job">
+                        <Grid>
+                            <Grid.Resources>
+                                <Style x:Key="LabelStyle" TargetType="TextBlock">
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="Margin" Value="5,5,15,5"/>
+                                </Style>
+                            </Grid.Resources>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0"
+                                       Style="{StaticResource LabelStyle}"
+                                       Text="JobId"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1"
+                                       Text="{Binding JobId}"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0"
+                                       Style="{StaticResource LabelStyle}"
+                                       Text="Progress"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1"
+                                       Text="{Binding Progress}"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0"
+                                       Style="{StaticResource LabelStyle}"
+                                       Text="Message"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1"
+                                       Text="{Binding Message}"/>
+                        </Grid>
+                    </DataTemplate>
+                </DataGrid.RowDetailsTemplate>
                 <DataGrid.Columns>
-                    <DataGridTextColumn IsReadOnly="True" Width="3*" Header="JobId" Binding="{Binding JobId}"/>
-                    <DataGridTextColumn IsReadOnly="True" Width="*" Header="Status" Binding="{Binding Status}"/>
-                    <DataGridTextColumn IsReadOnly="True" Width="*" Header="Progress" Binding="{Binding Progress}"/>
-                    <DataGridTextColumn IsReadOnly="True" Width="*" Header="Message" Binding="{Binding Message}"/>
+                    <DataGridTemplateColumn IsReadOnly="True" Width="*" Header="Status">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="entities:Job">
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Height="12" Width="12" Margin="5">
+                                        <Ellipse.Style>
+                                            <Style TargetType="Ellipse">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding JobStatus}" Value="{x:Static entities:JobStatus.Accepted}">
+                                                        <Setter Property="Fill" Value="Orange"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding JobStatus}" Value="{x:Static entities:JobStatus.Dismissed}">
+                                                        <Setter Property="Fill" Value="Aqua"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding JobStatus}" Value="{x:Static entities:JobStatus.Failed}">
+                                                        <Setter Property="Fill" Value="Red"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding JobStatus}" Value="{x:Static entities:JobStatus.Running}">
+                                                        <Setter Property="Fill" Value="MediumPurple"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding JobStatus}" Value="{x:Static entities:JobStatus.Successful}">
+                                                        <Setter Property="Fill" Value="Green"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Ellipse.Style>
+                                    </Ellipse>
+                                    <TextBlock Text="{Binding Status}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn IsReadOnly="True" Width="*" Header="Title" Binding="{Binding Title}" />
+                    <DataGridTextColumn IsReadOnly="True" Width="2*" Header="Description" Binding="{Binding Description}"/>
                 </DataGrid.Columns>
             </DataGrid>
+            <GroupBox Grid.Row="2" Header="Progress">
+                <DataGrid ItemsSource="{Binding ActivityList}"
+                          GridLinesVisibility="Vertical"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          CanUserReorderColumns="False"
+                          HeadersVisibility="Column"
+                          AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn IsReadOnly="True" 
+                                            Header="Name" 
+                                            Binding="{Binding Name}"/>
 
-            <TextBox Grid.Row="2"
-                     TextWrapping="Wrap"
-                     MaxHeight="300"
-                     VerticalScrollBarVisibility="Auto"
-                     Visibility="Collapsed"
-                     Text="{Binding Data}"/>
-
+                        <DataGridTextColumn IsReadOnly="True" 
+                                            Width="*" 
+                                            Header="Progress" 
+                                            Binding="{Binding ProgressText}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </GroupBox>
         </Grid>
 
         <!--Grid showing login page-->
@@ -138,16 +259,53 @@
             <WebBrowser x:Name="Browser" Grid.Row="0"/>
         </Grid>
 
-        <Grid Grid.Row="0" Grid.Column="2" Visibility="{Binding LoginSuccessful, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition />
-            </Grid.RowDefinitions>
-            <Button Grid.Row="0"
+        <GroupBox Header="Files" 
+                  Grid.Row="0" Grid.Column="0"
+                  Visibility="{Binding LoginSuccessful, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <Button Grid.Row="0"
                     Content="Get files" 
                     Command="{Binding GetFilesOverviewCommand}"/>
-            <ListView Grid.Row="1" ItemsSource="{Binding Files}"/>
-        </Grid>
+
+                <TreeView Grid.Row="1" 
+                          x:Name="FileTreeView"
+                          ItemsSource="{Binding FilesRootFolder}">
+                    <TreeView.Resources>
+                        <HierarchicalDataTemplate DataType="{x:Type views:RemoteFolder}" 
+                                                  ItemsSource="{Binding Items}">
+                            <StackPanel Orientation="Horizontal">
+                                <Rectangle Width="16" Height="16">
+                                    <Rectangle.Fill>
+                                        <DrawingBrush Drawing="{StaticResource FolderDrawing}"/>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                                <TextBlock Text="{Binding Name}" Margin="3"/>
+                            </StackPanel>
+                        </HierarchicalDataTemplate>
+
+                        <DataTemplate DataType="{x:Type views:RemotePath}">
+                            <StackPanel Orientation="Horizontal">
+                                <Rectangle Width="16" Height="16">
+                                <Rectangle.Fill>
+                                    <DrawingBrush Drawing="{StaticResource FileDrawing}"/>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <TextBlock Text="{Binding Name}" Margin="3"/>
+                            </StackPanel>
+                        </DataTemplate>
+
+                    </TreeView.Resources>
+                    <TreeView.InputBindings>
+                        <KeyBinding Key="Delete" Command="{Binding DeleteFileCommand}" CommandParameter="{Binding Path=SelectedItem, ElementName=FileTreeView}"/>
+                    </TreeView.InputBindings>
+                </TreeView>
+            </Grid>
+        </GroupBox>
 
         <!--Status bar showing errors and login status-->
         <StatusBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
