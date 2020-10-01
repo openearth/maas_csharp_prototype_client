@@ -1,0 +1,213 @@
+﻿<Window x:Class="DeltaSphereTestApp.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="clr-namespace:DeltaSphereTestApp.Views"
+        xmlns:entities="clr-namespace:DeltaSphereTestApp.Entities"
+        mc:Ignorable="d"
+        Title="Deltasphere demo app" Height="900" Width="1200"
+        Loaded="MainWindow_OnLoaded">
+    <Grid>
+        <Grid.DataContext>
+            <!--Main view model-->
+            <views:MainWindowViewModel x:Name="MainWindowViewModel"/>
+        </Grid.DataContext>
+
+        <Grid.Resources>
+            <ResourceDictionary>
+                <ResourceDictionary.MergedDictionaries>
+                    <ResourceDictionary Source="MainWindowResources.xaml"/>
+                    <ResourceDictionary>
+                        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+                    </ResourceDictionary>
+                </ResourceDictionary.MergedDictionaries>
+            </ResourceDictionary>
+        </Grid.Resources>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition />
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!--Grid showing model runs-->
+        <Grid Grid.Row="0" 
+              Grid.Column="1" 
+              Visibility="{Binding LoginSuccessful, Converter={StaticResource BooleanToVisibilityConverter}}">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition />
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                <TextBlock Text="Process" Margin="5" VerticalAlignment="Center"/>
+                <ComboBox ItemsSource="{Binding Processes}"
+                          ItemTemplate="{StaticResource ProcessComboBoxItemTemplate}"
+                          SelectedValue="{Binding SelectedProcess}"
+                          MinWidth="200"
+                          Margin="5"/>
+                <Grid>
+                    <ToggleButton x:Name="AddButton" 
+                                  IsEnabled="{Binding HasSelectedProcess}" 
+                                  Margin="5"
+                                  Width="100">
+                        <ToggleButton.Content>
+                            <TextBlock Text="Add job"/>
+                        </ToggleButton.Content>
+                    </ToggleButton>
+                    <Popup PlacementTarget="{Binding ElementName=AddButton}"
+                           IsOpen="{Binding Path=IsChecked, ElementName=AddButton}">
+                        <Border BorderBrush="Black" Background="White" BorderThickness="1">
+                            <Grid Width="600">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+
+                                <Grid.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Margin" Value="5"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                    <Style TargetType="ListBox">
+                                        <Setter Property="Margin" Value="5"/>
+                                    </Style>
+                                </Grid.Resources>
+                                
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column ="0" Text="Job name"/>
+                                <TextBox Grid.Row="0" Grid.Column ="1" Text="{Binding NewJobName}" Margin="5" Height="28"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column ="0" Text="Input folder"/>
+                                <Border Grid.Row="1" Grid.Column ="1" BorderBrush="Black" BorderThickness="1" Margin="5">
+                                    <TextBlock Text="{Binding InputDirectory}"/>
+                                </Border>
+
+                                <StackPanel Grid.Row="1" Grid.Column="2" >
+                                    <Button Content="Select folder" Command="{Binding GetInputFilesFromFolderCommand}"/>
+                                </StackPanel>
+
+                                <Button Grid.Row="2" Grid.Column="2" Content="Add job" Command="{Binding AddJobCommand}"/>
+                            </Grid>
+                        </Border>
+                    </Popup>
+                </Grid>
+            </StackPanel>
+
+            <DataGrid Grid.Row="1" 
+                      x:Name="JobsDataGrid"
+                      ItemsSource="{Binding Jobs}"
+                      CanUserAddRows="False"
+                      AutoGenerateColumns="False"
+                      SelectionChanged="SelectorOnSelectionChanged"
+                      CanUserDeleteRows="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn IsReadOnly="True" Width="3*" Header="JobId" Binding="{Binding JobId}"/>
+                    <DataGridTextColumn IsReadOnly="True" Width="*" Header="Status" Binding="{Binding Status}"/>
+                    <DataGridTextColumn IsReadOnly="True" Width="*" Header="Progress" Binding="{Binding Progress}"/>
+                    <DataGridTextColumn IsReadOnly="True" Width="*" Header="Message" Binding="{Binding Message}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <TextBox Grid.Row="2"
+                     TextWrapping="Wrap"
+                     MaxHeight="300"
+                     VerticalScrollBarVisibility="Auto"
+                     Visibility="Collapsed"
+                     Text="{Binding Data}"/>
+
+        </Grid>
+
+        <!--Grid showing login page-->
+        <Grid Grid.Row="0" Grid.Column="1" 
+                    Visibility="{Binding ShowBrowser, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <WebBrowser x:Name="Browser" Grid.Row="0"/>
+        </Grid>
+
+        <Grid Grid.Row="0" Grid.Column="2" Visibility="{Binding LoginSuccessful, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Button Grid.Row="0"
+                    Content="Get files" 
+                    Command="{Binding GetFilesOverviewCommand}"/>
+            <ListView Grid.Row="1" ItemsSource="{Binding Files}"/>
+        </Grid>
+
+        <!--Status bar showing errors and login status-->
+        <StatusBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            
+            <StatusBarItem>
+                <TextBlock Text="Error: " />
+            </StatusBarItem>
+            
+            <StatusBarItem Grid.Column="1">
+                <TextBlock Text="{Binding ErrorMessage}" />
+            </StatusBarItem>
+
+            <Separator Grid.Column="2" />
+
+            <StatusBarItem Grid.Column="3">
+                <TextBlock Text="Logged in as:" VerticalAlignment="Center"/>
+            </StatusBarItem>
+
+            <StatusBarItem Grid.Column="4">
+                <TextBlock Text="{Binding LoginName}" VerticalAlignment="Center"/>
+            </StatusBarItem>
+
+            <Separator Grid.Column="5" />
+
+            <StatusBarItem Grid.Column="6">
+                <TextBlock Text="Status:" VerticalAlignment="Center"/>
+            </StatusBarItem>
+            
+            <StatusBarItem Grid.Column="7">
+                <Ellipse Width="12" Height="12" VerticalAlignment="Center">
+                    <Ellipse.Style>
+                        <Style TargetType="Ellipse">
+                            <Setter Property="Fill" Value="Red"></Setter>
+                            <Setter Property="ToolTip" Value="Logged off"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding LoginSuccessful}" Value="True">
+                                    <Setter Property="Fill" Value="Green"/>
+                                    <Setter Property="ToolTip" Value="Logged on"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Ellipse.Style>
+                </Ellipse>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>
