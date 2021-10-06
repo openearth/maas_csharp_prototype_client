@@ -31,6 +31,17 @@ namespace DeltaSphereTestApp.Views
                     : "";
             };
 
+            MainWindowViewModel.GetFileName = (s) =>
+            {
+                var saveDialog = new SaveFileDialog
+                {
+                    FileName = s
+                };
+
+                return saveDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK
+                    ? saveDialog.FileName
+                    : null;
+            };
 
             // re-route navigating event to view model
             Browser.Navigating += (s, a)=>

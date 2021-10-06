@@ -31,7 +31,7 @@ namespace DeltaSphereTestApp.Api
         {
             var loginNames = await GetStringFromAsync(new Uri(baseUri, "me"));
             var userData = JsonConvert.DeserializeObject<User>(loginNames);
-            return userData.Email;
+            return userData?.Email;
         }
 
         internal async Task<IList<Process>> GetProcesses()
@@ -121,7 +121,7 @@ namespace DeltaSphereTestApp.Api
 
         internal async Task<bool> DeleteFile(string s3FilePath)
         {
-            var escapedS3Path = s3FilePath.Replace(Path.DirectorySeparatorChar.ToString(), "%2F");
+            var escapedS3Path = EscapeS3Path(s3FilePath);
 
             var url = new Uri(baseUri, $"{FilesUriId}/{escapedS3Path}");
             var deleteSuccessful = false;
@@ -132,6 +132,22 @@ namespace DeltaSphereTestApp.Api
             });
 
             return deleteSuccessful;
+        }
+
+        internal async Task DownloadFile(string s3FilePath, string destinationPath)
+        {
+            var escapedS3Path = EscapeS3Path(s3FilePath);
+
+            var url = new Uri(baseUri, $"{FilesUriId}/{escapedS3Path}");
+            await DoWithClientAsync(url, async client =>
+            {
+                await client.DownloadFileTaskAsync(url, destinationPath);
+            });
+        }
+
+        private static string EscapeS3Path(string s3FilePath)
+        {
+            return s3FilePath.Replace(Path.DirectorySeparatorChar.ToString(), "%2F");
         }
 
         private async Task PostDataTo(Uri uri, byte[] byteData)

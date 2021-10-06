@@ -302,6 +302,9 @@
                     </TreeView.Resources>
                     <TreeView.InputBindings>
                         <KeyBinding Key="Delete" Command="{Binding DeleteFileCommand}" CommandParameter="{Binding Path=SelectedItem, ElementName=FileTreeView}"/>
+                        <KeyBinding Key="Enter"
+                                    Command="{Binding DownloadFileCommand}"
+                                    CommandParameter="{Binding Path=SelectedItem, ElementName=FileTreeView}" />
                     </TreeView.InputBindings>
                 </TreeView>
             </Grid>

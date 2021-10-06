@@ -17,7 +17,7 @@ namespace DeltaSphereTestApp.Views
 {
     internal sealed class MainWindowViewModel : INotifyPropertyChanged
     {
-        private const string Server = "http://127.0.0.1:8000/v1/";
+        private const string Server = "http://127.0.0.1:8080/v1/";
         private bool loginSuccessful;
         private string errorMessage;
         private string sessionId;
@@ -61,6 +61,11 @@ namespace DeltaSphereTestApp.Views
         public ICommand DeleteFileCommand { get; private set; }
 
         /// <summary>
+        /// Downloads the specified file
+        /// </summary>
+        public ICommand DownloadFileCommand { get; private set; }
+
+        /// <summary>
         /// Get inputDirectory from folder
         /// </summary>
         public ICommand GetInputFilesFromFolderCommand { get; set; }
@@ -69,6 +74,11 @@ namespace DeltaSphereTestApp.Views
         /// Function for retrieving file names
         /// </summary>
         public Func<string> GetFolderName { get; set; }
+
+        /// <summary>
+        /// Retrieves a save path
+        /// </summary>
+        public Func<string, string> GetFileName { get; set; }
 
         /// <summary>
         /// Command for posting job
@@ -332,7 +342,7 @@ namespace DeltaSphereTestApp.Views
             GetProcessesCommand = new RelayCommand(o => { UpdateProcesses(); });
 
             GetFilesOverviewCommand = new RelayCommand(o => UpdateFiles());
-            
+
             GetInputFilesFromFolderCommand = new RelayCommand(o => InputDirectory = GetFolderName());
 
             RefreshJobsCommand = new RelayCommand(o => UpdateJobs());
@@ -340,18 +350,18 @@ namespace DeltaSphereTestApp.Views
             AddJobCommand = new RelayCommand(o => AddJob());
 
             DeleteJobCommand = new RelayCommand(
-                async o => await api.DeleteJob(SelectedProcess.Id, SelectedJob.JobId), 
+                async o => await api.DeleteJob(SelectedProcess.Id, SelectedJob.JobId),
                 o => SelectedJob != null);
 
             GetMeCommand = new RelayCommand(o => { UpdateLoginName(); });
 
-            DeleteFileCommand = new RelayCommand<object>(async o =>
+            DeleteFileCommand = new RelayCommand<IRemotePath>(async o =>
             {
                 if (!(o is IRemotePath remotePath)) return;
 
-                var remotePaths = o is RemoteFolder folder 
-                    ? folder.GetAllSubPathsRecursive().ToArray() 
-                    : new [] {remotePath};
+                var remotePaths = o is RemoteFolder folder
+                    ? folder.GetAllSubPathsRecursive().ToArray()
+                    : new[] { remotePath };
 
                 foreach (var path in remotePaths)
                 {
@@ -363,7 +373,15 @@ namespace DeltaSphereTestApp.Views
                 }
 
                 UpdateFiles();
-            }, o => o is IRemotePath);
+            }, o => o != null);
+
+            DownloadFileCommand = new RelayCommand<IRemotePath>(async remotePath =>
+            {
+                var fileName = GetFileName?.Invoke(remotePath.Name);
+                if (fileName == null) return;
+
+                await api.DownloadFile(remotePath.FullPath, fileName);
+            });
         }
 
         private async void AddJob()
