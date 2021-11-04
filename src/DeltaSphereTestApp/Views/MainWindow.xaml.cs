@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Microsoft.Web.WebView2.Core;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
@@ -44,13 +45,13 @@ namespace DeltaSphereTestApp.Views
             };
 
             // re-route navigating event to view model
-            Browser.Navigating += (s, a)=>
+            Browser.NavigationStarting += (o, args) =>
             {
-                a.Cancel = MainWindowViewModel.BrowserNavigating(a.Uri.AbsoluteUri);
+                args.Cancel = MainWindowViewModel.BrowserNavigating(args.Uri);
             };
-            
+
             // Start with login page
-            Browser.Navigate(new Uri(MainWindowViewModel.BaseUri, "login"));
+            Browser.Source = MainWindowViewModel.LoginUri;
         }
 
         private void SelectorOnSelectionChanged(object sender, SelectionChangedEventArgs e)

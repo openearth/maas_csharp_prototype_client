@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:DeltaSphereTestApp.Views"
         xmlns:entities="clr-namespace:DeltaSphereTestApp.Entities"
+        xmlns:wpf="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         mc:Ignorable="d"
         Title="Deltasphere demo app" Height="900" Width="1200"
         Loaded="MainWindow_OnLoaded">
@@ -256,7 +257,8 @@
         <!--Grid showing login page-->
         <Grid Grid.Row="0" Grid.Column="1" 
                     Visibility="{Binding ShowBrowser, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <WebBrowser x:Name="Browser" Grid.Row="0"/>
+            <wpf:WebView2 x:Name="Browser"
+                          Grid.Row="0"/>
         </Grid>
 
         <GroupBox Header="Files" 

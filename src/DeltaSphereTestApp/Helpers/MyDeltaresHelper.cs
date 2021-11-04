@@ -14,9 +14,9 @@ namespace DeltaSphereTestApp.Helpers
                 : null;
         }
 
-        public static bool IsEndUrl(this string uri)
+        public static bool IsEndUrl(this string uri, Uri baseUri)
         {
-            return uri.ToLower().StartsWith("https://sts.deltares.nl/adfs/ls/", StringComparison.InvariantCultureIgnoreCase);
+            return uri.ToLower().StartsWith(baseUri.AbsoluteUri + "me", StringComparison.InvariantCultureIgnoreCase);
         }
 
         [DllImport("wininet.dll", CharSet = CharSet.Auto, SetLastError = true)]

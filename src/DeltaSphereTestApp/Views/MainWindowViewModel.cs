@@ -163,6 +163,11 @@ namespace DeltaSphereTestApp.Views
 
         public Uri BaseUri { get; } = new Uri(Server);
 
+        public Uri LoginUri
+        {
+            get { return new Uri(BaseUri + "login"); }
+        }
+
         /// <summary>
         /// The currently selected process
         /// </summary>
@@ -303,7 +308,7 @@ namespace DeltaSphereTestApp.Views
                 sessionId = url.TryGetSession(BaseUri);
             }
 
-            if (string.IsNullOrEmpty(sessionId) || !url.IsEndUrl())
+            if (string.IsNullOrEmpty(sessionId) || !url.IsEndUrl(BaseUri))
             {
                 return false;
             }
